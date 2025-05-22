@@ -1,0 +1,19 @@
+spring:
+  application:
+    name: ddantime
+  config:
+    import: optional:file:.env[.properties]
+  datasource:
+    url: ${DB_URL}
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
+  jpa:
+    hibernate:
+      ddl-auto: create  # 또는 update (개발 중에는 create or update, 배포 시에는 validate or none)
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+# 포트 변경
+server:
+  port: 8888
