@@ -5,4 +5,5 @@ import com.ddantime.ddantime.domain.user.dto.UserResponseDto;
 
 public interface UserService {
     UserResponseDto createUser(UserCreateRequestDto requestDto);
+    UserResponseDto getUserByUuid(String uuid);
 }

@@ -3,7 +3,6 @@ package com.ddantime.ddantime.domain.user.controller;
 
 import com.ddantime.ddantime.domain.user.dto.UserCreateRequestDto;
 import com.ddantime.ddantime.domain.user.dto.UserResponseDto;
-import com.ddantime.ddantime.domain.user.entity.User;
 import com.ddantime.ddantime.domain.user.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -25,5 +24,17 @@ public class UserController {
         UserResponseDto response = userService.createUser(request);
         return ResponseEntity.ok(response);
     }
+
+    @GetMapping("/me")
+    @Operation(summary = "사용자 조회", description = "요청 헤더의 UUID로 사용자 정보 조회")
+    public ResponseEntity<UserResponseDto> getUserByUuid(
+            @RequestHeader("Ddantime-User-Id") String uuid) {
+        // TODO: 리팩토링 고민, 이미 인터셉터에서 존재여부를 판단함.
+        UserResponseDto response = userService.getUserByUuid(uuid);
+        return ResponseEntity.ok(response);
+    }
+
+
+
 
 }
