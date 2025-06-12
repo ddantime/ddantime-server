@@ -3,6 +3,7 @@ package com.ddantime.ddantime.domain.user.service;
 import com.ddantime.ddantime.common.exception.CustomException;
 import com.ddantime.ddantime.common.exception.ErrorCode;
 import com.ddantime.ddantime.domain.user.dto.UserCreateRequestDto;
+import com.ddantime.ddantime.domain.user.dto.UserDeviceUpdateRequestDto;
 import com.ddantime.ddantime.domain.user.dto.UserResponseDto;
 import com.ddantime.ddantime.domain.user.entity.User;
 import com.ddantime.ddantime.domain.user.repository.UserRepository;
@@ -34,6 +35,19 @@ public class UserServiceImpl implements UserService {
     public UserResponseDto getUserByUuid(String uuid) {
         User user = userRepository.findById(UUID.fromString(uuid))
                 .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
+        return toDto(user);
+    }
+
+    @Override
+    public UserResponseDto updateDeviceInfo(String uuid, UserDeviceUpdateRequestDto requestDto) {
+        User user = userRepository.findById(UUID.fromString(uuid))
+                .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
+
+        user.setOsVersion(requestDto.getOsVersion());
+        user.setAppVersion(requestDto.getAppVersion());
+        user.setBuildNumber(requestDto.getBuildNumber());
+
+        userRepository.save(user);
         return toDto(user);
     }
 

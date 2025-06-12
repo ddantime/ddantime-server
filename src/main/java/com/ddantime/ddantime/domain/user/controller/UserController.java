@@ -2,6 +2,7 @@ package com.ddantime.ddantime.domain.user.controller;
 
 
 import com.ddantime.ddantime.domain.user.dto.UserCreateRequestDto;
+import com.ddantime.ddantime.domain.user.dto.UserDeviceUpdateRequestDto;
 import com.ddantime.ddantime.domain.user.dto.UserResponseDto;
 import com.ddantime.ddantime.domain.user.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -33,6 +34,16 @@ public class UserController {
         UserResponseDto response = userService.getUserByUuid(uuid);
         return ResponseEntity.ok(response);
     }
+
+    @PutMapping("/me/device-info")
+    @Operation(summary = "기기 정보 업데이트", description = "OS/App/Build 버전이 변경된 경우 업데이트")
+    public ResponseEntity<UserResponseDto> updateDeviceInfo(
+            @RequestHeader("Ddantime-User-Id") String uuid,
+            @RequestBody UserDeviceUpdateRequestDto request) {
+        UserResponseDto response = userService.updateDeviceInfo(uuid, request);
+        return ResponseEntity.ok(response);
+    }
+
 
 
 
