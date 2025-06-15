@@ -3,10 +3,12 @@ package com.ddantime.ddantime.domain.user.controller;
 
 import com.ddantime.ddantime.domain.user.dto.UserCreateRequestDto;
 import com.ddantime.ddantime.domain.user.dto.UserDeviceUpdateRequestDto;
+import com.ddantime.ddantime.domain.user.dto.UserNicknameUpdateRequestDto;
 import com.ddantime.ddantime.domain.user.dto.UserResponseDto;
 import com.ddantime.ddantime.domain.user.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -44,8 +46,12 @@ public class UserController {
         return ResponseEntity.ok(response);
     }
 
-
-
-
-
+    @PatchMapping("/me/nickname")
+    @Operation(summary = "닉네임 수정", description = "사용자의 닉네임을 수정합니다.")
+    public ResponseEntity<Void> updateNickname(
+            @RequestHeader("Ddantime-User-Id") String uuid,
+            @Valid @RequestBody UserNicknameUpdateRequestDto request) {
+        userService.updateNickname(uuid, request);
+        return ResponseEntity.noContent().build();
+    }
 }
