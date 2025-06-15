@@ -1,19 +1,68 @@
 spring:
   application:
     name: ddantime
+  profiles:
+    active: dev # 실행 시 기본 profile (필요 시 --spring.profiles.active=local 등으로 override 가능)
+    group:
+      local:
+        - common
+      dev:
+        - common
+      prod:
+        - common
+---
+
+spring:
   config:
-    import: optional:file:.env[.properties]
+    activate:
+      on-profile: common
   datasource:
     url: ${DB_URL}
     username: ${DB_USERNAME}
     password: ${DB_PASSWORD}
+    driver-class-name: org.postgresql.Driver
   jpa:
     hibernate:
-      ddl-auto: create  # 또는 update (개발 중에는 create or update, 배포 시에는 validate or none)
+      ddl-auto: create  # dev/local은 create 또는 update / prod는 validate 추천
     show-sql: true
     properties:
       hibernate:
         format_sql: true
-# 포트 변경
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+  springdoc:
+    # 기본적으로 사용할 요청 및 응답의 미디어 타입을 설정
+    default-produces-media-type: application/json;charset=UTF-8
+    default-consumes-media-type: application/json;charset=UTF-8
+
+---
+
+spring:
+  activate:
+    on-profile: local
+  config:
+    import: optional:file:.env[.properties]
+
 server:
   port: 8888
+
+---
+
+spring:
+  config:
+    activate:
+      on-profile: dev
+server:
+  port: ${PORT:8080}
+
+springdoc:
+  # 요청 URL 강제 HTTPS (OpenAPI URL이 현재 도메인을 따라가지 않도록 고정)
+  server-url: https://ddantime-dev-647554719138.asia-northeast3.run.app
+
+---
+
+spring:
+  config:
+    activate:
+      on-profile: prod
+server:
+  port: ${PORT:8080}
