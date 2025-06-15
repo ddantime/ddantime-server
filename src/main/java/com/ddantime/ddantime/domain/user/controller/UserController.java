@@ -35,7 +35,7 @@ public class UserController {
         return ResponseEntity.ok(response);
     }
 
-    @PutMapping("/me/device-info")
+    @PatchMapping("/me/device-info")
     @Operation(summary = "기기 정보 업데이트", description = "OS/App/Build 버전이 변경된 경우 업데이트")
     public ResponseEntity<UserResponseDto> updateDeviceInfo(
             @RequestHeader("Ddantime-User-Id") String uuid,
