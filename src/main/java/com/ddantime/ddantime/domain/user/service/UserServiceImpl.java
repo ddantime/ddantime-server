@@ -4,6 +4,7 @@ import com.ddantime.ddantime.common.exception.CustomException;
 import com.ddantime.ddantime.common.exception.ErrorCode;
 import com.ddantime.ddantime.domain.user.dto.UserCreateRequestDto;
 import com.ddantime.ddantime.domain.user.dto.UserDeviceUpdateRequestDto;
+import com.ddantime.ddantime.domain.user.dto.UserNicknameUpdateRequestDto;
 import com.ddantime.ddantime.domain.user.dto.UserResponseDto;
 import com.ddantime.ddantime.domain.user.entity.User;
 import com.ddantime.ddantime.domain.user.repository.UserRepository;
@@ -50,6 +51,23 @@ public class UserServiceImpl implements UserService {
         userRepository.save(user);
         return toDto(user);
     }
+
+    @Override
+    public void updateNickname(String uuid, UserNicknameUpdateRequestDto requestDto) {
+
+        String nickname = requestDto.getNickname();
+        if (userRepository.existsByNickname(nickname)) {
+            throw new CustomException(ErrorCode.NICKNAME_DUPLICATED);
+        }
+
+        User user = userRepository.findById(UUID.fromString(uuid))
+                .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
+
+        user.setNickname(nickname);
+        userRepository.save(user);
+
+    }
+
 
     private UserResponseDto toDto(User user) {
         return UserResponseDto.builder()
