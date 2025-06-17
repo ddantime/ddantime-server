@@ -37,6 +37,9 @@ public class User {
     @Column(length = 30)
     private String nickname;
 
+    @Column(name = "onboarding_completed", nullable = false)
+    private boolean onboardingCompleted = false;
+
     @Column(name = "last_login_at")
     private LocalDateTime lastLoginAt;
 

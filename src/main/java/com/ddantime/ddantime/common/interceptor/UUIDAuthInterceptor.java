@@ -2,6 +2,7 @@ package com.ddantime.ddantime.common.interceptor;
 
 import com.ddantime.ddantime.common.exception.CustomException;
 import com.ddantime.ddantime.common.exception.ErrorCode;
+import com.ddantime.ddantime.domain.user.entity.User;
 import com.ddantime.ddantime.domain.user.repository.UserRepository;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -37,9 +38,10 @@ public class UUIDAuthInterceptor implements HandlerInterceptor {
             throw new CustomException(ErrorCode.INVALID_UUID);
         }
 
-        if (!userRepository.existsById(uuid)) {
-            throw new CustomException(ErrorCode.USER_NOT_FOUND);
-        }
+        User user = userRepository.findById(uuid)
+                .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
+
+        request.setAttribute("requestUser", user);
 
         return true;
     }
