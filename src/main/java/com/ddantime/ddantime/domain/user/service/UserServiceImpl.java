@@ -73,7 +73,7 @@ public class UserServiceImpl implements UserService {
         return UserResponseDto.builder()
                 .uuid(user.getId().toString())
                 .nickname(user.getNickname())
-                .onboardingCompleted(false) // TODO
+                .onboardingCompleted(user.isOnboardingCompleted())
                 .os(user.getOs())
                 .osVersion(user.getOsVersion())
                 .appVersion(user.getAppVersion())
