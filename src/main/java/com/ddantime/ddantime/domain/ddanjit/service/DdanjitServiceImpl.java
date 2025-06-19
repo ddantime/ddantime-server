@@ -10,6 +10,9 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.time.Duration;
+import java.time.LocalDate;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -37,6 +40,14 @@ public class DdanjitServiceImpl implements DdanjitService {
         return toDto(saved);
     }
 
+    @Override
+    public List<DdanjitResponseDto> getRecordsByDate(User user, LocalDate date) {
+        List<Ddanjit> records = ddanjitRepository.findAllByUserAndDateOrderByStartTimeDescEndTimeDescCreatedAtDesc(user, date);
+        return records.stream()
+                .map(this::toDto)
+                .collect(Collectors.toList());
+    }
+
     public DdanjitResponseDto toDto(Ddanjit entity) {
         return DdanjitResponseDto.builder()
                 .id(entity.getId())
@@ -44,7 +55,6 @@ public class DdanjitServiceImpl implements DdanjitService {
                 .activity(entity.getActivity())
                 .startTime(entity.getStartTime())
                 .durationMin(entity.getDurationMin())
-                .endTime(entity.getEndTime())
                 .location(entity.getLocation())
                 .locationEtc(entity.getLocationEtc())
                 .mood(entity.getMood())
