@@ -47,4 +47,13 @@ public class DdanjitController {
         List<DdanjitResponseDto> records = ddanjitService.getRecordsByDate(user, date);
         return ResponseEntity.ok(records);
     }
+
+    @GetMapping("/dates")
+    @Operation(summary = "딴짓 기록이 있는 날짜 목록 조회", description = "사용자의 딴짓 기록이 존재하는 날짜 리스트 반환")
+    public  ResponseEntity<List<LocalDate>> getRecordDates(
+            @RequestHeader("Ddantime-User-Id") String uuid,
+            @Parameter(hidden = true) @RequestUser User user) {
+        List<LocalDate> dates = ddanjitService.getDatesByUser(user);
+        return ResponseEntity.ok(dates);
+    }
 }

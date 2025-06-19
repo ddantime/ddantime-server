@@ -48,6 +48,10 @@ public class DdanjitServiceImpl implements DdanjitService {
                 .collect(Collectors.toList());
     }
 
+    public List<LocalDate> getDatesByUser(User user) {
+        return ddanjitRepository.findDistinctDatesByUser(user);
+    }
+
     public DdanjitResponseDto toDto(Ddanjit entity) {
         return DdanjitResponseDto.builder()
                 .id(entity.getId())

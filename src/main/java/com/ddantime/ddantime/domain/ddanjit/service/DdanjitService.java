@@ -10,4 +10,5 @@ import java.util.List;
 public interface DdanjitService {
     DdanjitResponseDto create(User user, DdanjitCreateRequestDto requestDto);
     List<DdanjitResponseDto> getRecordsByDate(User user, LocalDate date);
+    List<LocalDate> getDatesByUser(User user);
 }
