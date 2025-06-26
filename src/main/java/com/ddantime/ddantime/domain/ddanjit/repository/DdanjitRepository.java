@@ -8,9 +8,11 @@ import org.springframework.data.repository.query.Param;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 
 public interface DdanjitRepository extends JpaRepository<Ddanjit, Long> {
     List<Ddanjit> findAllByUserAndDateOrderByStartTimeDescEndTimeDescCreatedAtDesc(User user, LocalDate date);
     @Query("SELECT DISTINCT d.date FROM Ddanjit d WHERE d.user = :user")
     List<LocalDate> findDistinctDatesByUser(@Param("user") User user);
+    Optional<Ddanjit> findByIdAndUser(Long id, User user);
 }

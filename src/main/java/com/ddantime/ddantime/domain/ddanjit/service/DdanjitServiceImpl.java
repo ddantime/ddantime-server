@@ -1,15 +1,17 @@
 package com.ddantime.ddantime.domain.ddanjit.service;
 
-import com.ddantime.ddantime.domain.ddanjit.dto.DdanjitCreateRequestDto;
+import com.ddantime.ddantime.common.exception.CustomException;
+import com.ddantime.ddantime.common.exception.ErrorCode;
+import com.ddantime.ddantime.domain.ddanjit.dto.DdanjitRequestDto;
 import com.ddantime.ddantime.domain.ddanjit.dto.DdanjitResponseDto;
 import com.ddantime.ddantime.domain.ddanjit.entity.Ddanjit;
 import com.ddantime.ddantime.domain.ddanjit.entity.LocationType;
 import com.ddantime.ddantime.domain.ddanjit.repository.DdanjitRepository;
 import com.ddantime.ddantime.domain.user.entity.User;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
-import java.time.Duration;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -21,7 +23,7 @@ public class DdanjitServiceImpl implements DdanjitService {
     private final DdanjitRepository ddanjitRepository;
 
     @Override
-    public DdanjitResponseDto create(User user, DdanjitCreateRequestDto dto) {
+    public DdanjitResponseDto create(User user, DdanjitRequestDto dto) {
 
         Ddanjit record = Ddanjit.builder()
                 .user(user)
@@ -48,8 +50,18 @@ public class DdanjitServiceImpl implements DdanjitService {
                 .collect(Collectors.toList());
     }
 
+    @Override
     public List<LocalDate> getDatesByUser(User user) {
         return ddanjitRepository.findDistinctDatesByUser(user);
+    }
+
+    @Override
+    @Transactional
+    public void update(Long id, DdanjitRequestDto requestDto, User user) {
+        Ddanjit ddanjit = ddanjitRepository.findByIdAndUser(id, user)
+                .orElseThrow(() -> new CustomException(ErrorCode.DDANJIT_NOT_FOUND));
+
+        ddanjit.update(requestDto);
     }
 
     public DdanjitResponseDto toDto(Ddanjit entity) {

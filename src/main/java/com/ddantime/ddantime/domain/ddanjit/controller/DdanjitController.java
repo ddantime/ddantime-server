@@ -1,11 +1,9 @@
 package com.ddantime.ddantime.domain.ddanjit.controller;
 
 import com.ddantime.ddantime.common.annotation.RequestUser;
-import com.ddantime.ddantime.domain.ddanjit.dto.DdanjitCreateRequestDto;
+import com.ddantime.ddantime.domain.ddanjit.dto.DdanjitRequestDto;
 import com.ddantime.ddantime.domain.ddanjit.dto.DdanjitResponseDto;
 import com.ddantime.ddantime.domain.ddanjit.service.DdanjitService;
-import com.ddantime.ddantime.domain.onboarding.dto.OnboardingRequestDto;
-import com.ddantime.ddantime.domain.onboarding.dto.OnboardingResponseDto;
 import com.ddantime.ddantime.domain.user.entity.User;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -32,7 +30,7 @@ public class DdanjitController {
     public ResponseEntity<Void> createDdanjit(
             @RequestHeader("Ddantime-User-Id") String uuid,
             @Parameter(hidden = true) @RequestUser User user,
-            @RequestBody @Valid DdanjitCreateRequestDto requestDto
+            @RequestBody @Valid DdanjitRequestDto requestDto
     ) {
         ddanjitService.create(user, requestDto);
         return ResponseEntity.noContent().build(); // 204 응답
@@ -55,5 +53,17 @@ public class DdanjitController {
             @Parameter(hidden = true) @RequestUser User user) {
         List<LocalDate> dates = ddanjitService.getDatesByUser(user);
         return ResponseEntity.ok(dates);
+    }
+
+    @PutMapping("/{id}")
+    @Operation(summary = "딴짓 기록 수정", description = "기존의 딴짓 기록을 수정합니다.")
+    public ResponseEntity<Void> updateDdanjit(
+            @PathVariable Long id,
+            @RequestBody @Valid DdanjitRequestDto requestDto,
+            @RequestHeader("Ddantime-User-Id") String uuid,
+            @Parameter(hidden = true) @RequestUser User user
+    ) {
+        ddanjitService.update(id, requestDto, user);
+        return ResponseEntity.noContent().build();
     }
 }
