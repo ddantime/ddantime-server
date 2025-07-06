@@ -64,6 +64,14 @@ public class DdanjitServiceImpl implements DdanjitService {
         ddanjit.update(requestDto);
     }
 
+    @Override
+    public void delete(Long id, User user) {
+        Ddanjit ddanjit = ddanjitRepository.findByIdAndUser(id, user)
+                .orElseThrow(() -> new CustomException(ErrorCode.DDANJIT_NOT_FOUND));
+
+        ddanjitRepository.delete(ddanjit);
+    }
+
     public DdanjitResponseDto toDto(Ddanjit entity) {
         return DdanjitResponseDto.builder()
                 .id(entity.getId())
