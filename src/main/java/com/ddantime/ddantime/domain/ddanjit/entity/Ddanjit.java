@@ -1,5 +1,6 @@
 package com.ddantime.ddantime.domain.ddanjit.entity;
 
+import com.ddantime.ddantime.domain.ddanjit.dto.DdanjitRequestDto;
 import com.ddantime.ddantime.domain.user.entity.User;
 import jakarta.persistence.*;
 import lombok.*;
@@ -67,5 +68,16 @@ public class Ddanjit {
         if (startTime != null && durationMin > 0) {
             this.endTime = startTime.plusMinutes(durationMin);
         }
+    }
+
+    public void update(DdanjitRequestDto dto) {
+        this.date = dto.getDate();
+        this.activity = dto.getActivity();
+        this.startTime = dto.getStartTime();
+        this.durationMin = dto.getDurationMin();
+        this.location = dto.getLocation();
+        this.locationEtc = dto.getLocation() == LocationType.OTHER ? dto.getLocationEtc() : null;
+        this.mood = dto.getMood();
+        this.memo = dto.getMemo();
     }
 }

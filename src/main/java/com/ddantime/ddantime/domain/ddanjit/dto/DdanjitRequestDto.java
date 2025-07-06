@@ -10,7 +10,7 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 
 @Getter
-public class DdanjitCreateRequestDto {
+public class DdanjitRequestDto {
 
     @Schema(description = "딴짓 기록 날짜", example = "2025-06-17")
     @NotNull(message = "날짜는 필수입니다.")
