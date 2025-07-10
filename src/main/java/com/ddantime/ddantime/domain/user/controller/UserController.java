@@ -2,10 +2,7 @@ package com.ddantime.ddantime.domain.user.controller;
 
 
 import com.ddantime.ddantime.common.annotation.RequestUser;
-import com.ddantime.ddantime.domain.user.dto.UserCreateRequestDto;
-import com.ddantime.ddantime.domain.user.dto.UserDeviceUpdateRequestDto;
-import com.ddantime.ddantime.domain.user.dto.UserNicknameUpdateRequestDto;
-import com.ddantime.ddantime.domain.user.dto.UserResponseDto;
+import com.ddantime.ddantime.domain.user.dto.*;
 import com.ddantime.ddantime.domain.user.entity.User;
 import com.ddantime.ddantime.domain.user.service.UserActivityMetaService;
 import com.ddantime.ddantime.domain.user.service.UserService;
@@ -31,6 +28,16 @@ public class UserController {
     public ResponseEntity<UserResponseDto> createUser(@RequestBody UserCreateRequestDto request) {
         UserResponseDto response = userService.createUser(request);
         return ResponseEntity.ok(response);
+    }
+
+    @DeleteMapping
+    @Operation(summary = "계정 탈퇴", description = "이탈 사유를 저장하고 사용자의 계정을 삭제합니다.")
+    public ResponseEntity<Void> withdrawUser(
+            @RequestHeader("Ddantime-User-Id") String uuid,
+            @Valid @RequestBody UserWithdrawalRequestDto request
+    ) {
+        userService.withdraw(uuid, request);
+        return ResponseEntity.noContent().build();
     }
 
     @GetMapping("/me")
@@ -69,4 +76,6 @@ public class UserController {
         userActivityMetaService.updateLastAccessDate(user);
         return ResponseEntity.noContent().build();
     }
+
+
 }

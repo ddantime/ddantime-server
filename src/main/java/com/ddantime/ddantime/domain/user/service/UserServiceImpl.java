@@ -2,13 +2,13 @@ package com.ddantime.ddantime.domain.user.service;
 
 import com.ddantime.ddantime.common.exception.CustomException;
 import com.ddantime.ddantime.common.exception.ErrorCode;
-import com.ddantime.ddantime.domain.user.dto.UserCreateRequestDto;
-import com.ddantime.ddantime.domain.user.dto.UserDeviceUpdateRequestDto;
-import com.ddantime.ddantime.domain.user.dto.UserNicknameUpdateRequestDto;
-import com.ddantime.ddantime.domain.user.dto.UserResponseDto;
+import com.ddantime.ddantime.domain.user.dto.*;
 import com.ddantime.ddantime.domain.user.entity.User;
 import com.ddantime.ddantime.domain.user.entity.UserActivityMeta;
+import com.ddantime.ddantime.domain.user.entity.UserWithdrawalReason;
 import com.ddantime.ddantime.domain.user.repository.UserRepository;
+import com.ddantime.ddantime.domain.user.repository.UserWithdrawalReasonRepository;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -19,6 +19,7 @@ import java.util.UUID;
 public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepository;
+    private final UserWithdrawalReasonRepository reasonRepository;
 
     @Override
     public UserResponseDto createUser(UserCreateRequestDto requestDto) {
@@ -72,6 +73,23 @@ public class UserServiceImpl implements UserService {
 
     }
 
+    @Override
+    @Transactional
+    public void withdraw(String uuid, UserWithdrawalRequestDto requestDto) {
+        User user = userRepository.findById(UUID.fromString(uuid))
+                .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
+
+        // 탈퇴 사유 저장
+        UserWithdrawalReason reason = UserWithdrawalReason.builder()
+                .reasonType(requestDto.getReasonType())
+                .reasonDetail(requestDto.getReasonDetail())
+                .build();
+        reasonRepository.save(reason);
+
+        // 사용자 삭제
+        userRepository.delete(user);
+    }
+
     private UserResponseDto toDto(User user) {
         UserActivityMeta meta = user.getActivityMeta();
 
@@ -88,5 +106,7 @@ public class UserServiceImpl implements UserService {
                 .lastRecordDate(meta.getLastRecordDate())
                 .build();
     }
+
+
 }
 
