@@ -7,6 +7,7 @@ import com.ddantime.ddantime.domain.user.dto.UserDeviceUpdateRequestDto;
 import com.ddantime.ddantime.domain.user.dto.UserNicknameUpdateRequestDto;
 import com.ddantime.ddantime.domain.user.dto.UserResponseDto;
 import com.ddantime.ddantime.domain.user.entity.User;
+import com.ddantime.ddantime.domain.user.entity.UserActivityMeta;
 import com.ddantime.ddantime.domain.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -27,6 +28,9 @@ public class UserServiceImpl implements UserService {
                 .appVersion(requestDto.getAppVersion())
                 .buildNumber(requestDto.getBuildNumber())
                 .build();
+
+        UserActivityMeta activityMeta = UserActivityMeta.of(user);
+        user.setActivityMeta(activityMeta);
 
         userRepository.save(user);
         return toDto(user);
@@ -68,8 +72,9 @@ public class UserServiceImpl implements UserService {
 
     }
 
-
     private UserResponseDto toDto(User user) {
+        UserActivityMeta meta = user.getActivityMeta();
+
         return UserResponseDto.builder()
                 .uuid(user.getId().toString())
                 .nickname(user.getNickname())
@@ -78,6 +83,9 @@ public class UserServiceImpl implements UserService {
                 .osVersion(user.getOsVersion())
                 .appVersion(user.getAppVersion())
                 .buildNumber(user.getBuildNumber())
+                .lastAccessDate(meta.getLastAccessDate())
+                .firstRecordDate(meta.getFirstRecordDate())
+                .lastRecordDate(meta.getLastRecordDate())
                 .build();
     }
 }
