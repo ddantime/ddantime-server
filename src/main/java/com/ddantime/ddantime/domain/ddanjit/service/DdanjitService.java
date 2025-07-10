@@ -13,4 +13,5 @@ public interface DdanjitService {
     List<LocalDate> getDatesByUser(User user);
     void update(Long id, DdanjitRequestDto requestDto, User user);
     void delete(Long id, User user);
+    void deleteAllByUser(User user);
 }

@@ -39,4 +39,14 @@ public class UserActivityMetaService {
         meta.setLastRecordDate(LocalDateTime.now());
         userActivityMetaRepository.save(meta);
     }
+
+    @Transactional
+    public void clearRecordDates(User user) {
+        UserActivityMeta meta = user.getActivityMeta();
+
+        meta.setFirstRecordDate(null);
+        meta.setLastRecordDate(null);
+
+        userActivityMetaRepository.save(meta); // 확실한 반영을 위해 명시적 저장
+    }
 }

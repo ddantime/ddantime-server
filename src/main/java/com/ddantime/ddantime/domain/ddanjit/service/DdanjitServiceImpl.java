@@ -8,6 +8,7 @@ import com.ddantime.ddantime.domain.ddanjit.entity.Ddanjit;
 import com.ddantime.ddantime.domain.ddanjit.entity.LocationType;
 import com.ddantime.ddantime.domain.ddanjit.repository.DdanjitRepository;
 import com.ddantime.ddantime.domain.user.entity.User;
+import com.ddantime.ddantime.domain.user.entity.UserActivityMeta;
 import com.ddantime.ddantime.domain.user.service.UserActivityMetaService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -76,6 +77,14 @@ public class DdanjitServiceImpl implements DdanjitService {
                 .orElseThrow(() -> new CustomException(ErrorCode.DDANJIT_NOT_FOUND));
 
         ddanjitRepository.delete(ddanjit);
+    }
+
+    @Override
+    @Transactional
+    public void deleteAllByUser(User user) {
+        ddanjitRepository.deleteByUser(user);
+        // 활동 메타데이터 초기화
+        userActivityMetaService.clearRecordDates(user);
     }
 
     public DdanjitResponseDto toDto(Ddanjit entity) {

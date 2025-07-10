@@ -78,4 +78,14 @@ public class DdanjitController {
     ) {
         ddanjitService.delete(id, user);
     }
+
+    @DeleteMapping
+    @Operation(summary = "딴짓 기록 초기화", description = "계정은 유지하고 사용자의 딴타임 내용과 활동일자만 초기화합니다.")
+    public ResponseEntity<Void> resetRecords(
+            @RequestHeader("Ddantime-User-Id") String uuid,
+            @Parameter(hidden = true) @RequestUser User user
+    ) {
+        ddanjitService.deleteAllByUser(user);
+        return ResponseEntity.noContent().build();
+    }
 }
