@@ -28,4 +28,15 @@ public class UserActivityMetaService {
         meta.setLastAccessDate(LocalDateTime.now());
         userActivityMetaRepository.save(meta);
     }
+
+    @Transactional
+    public void updateRecordDates(User user) {
+        UserActivityMeta meta = user.getActivityMeta();
+
+        if (meta.getFirstRecordDate() == null) {
+            meta.setFirstRecordDate(LocalDateTime.now());
+        }
+        meta.setLastRecordDate(LocalDateTime.now());
+        userActivityMetaRepository.save(meta);
+    }
 }
