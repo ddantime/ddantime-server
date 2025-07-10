@@ -15,4 +15,5 @@ public interface DdanjitRepository extends JpaRepository<Ddanjit, Long> {
     @Query("SELECT DISTINCT d.date FROM Ddanjit d WHERE d.user = :user")
     List<LocalDate> findDistinctDatesByUser(@Param("user") User user);
     Optional<Ddanjit> findByIdAndUser(Long id, User user);
+    void deleteByUser(User user);
 }
