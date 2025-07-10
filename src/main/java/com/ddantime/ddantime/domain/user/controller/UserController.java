@@ -43,18 +43,18 @@ public class UserController {
     @GetMapping("/me")
     @Operation(summary = "사용자 조회", description = "요청 헤더의 UUID로 사용자 정보 조회")
     public ResponseEntity<UserResponseDto> getUserByUuid(
-            @RequestHeader("Ddantime-User-Id") String uuid) {
-        // TODO: 리팩토링 고민, 이미 인터셉터에서 존재여부를 판단함.
-        UserResponseDto response = userService.getUserByUuid(uuid);
-        return ResponseEntity.ok(response);
+            @RequestHeader("Ddantime-User-Id") String uuid,
+            @Parameter(hidden = true) @RequestUser User user) {
+        return ResponseEntity.ok(UserResponseDto.of(user));
     }
 
     @PatchMapping("/me/device-info")
     @Operation(summary = "기기 정보 업데이트", description = "OS/App/Build 버전이 변경된 경우 업데이트")
     public ResponseEntity<UserResponseDto> updateDeviceInfo(
             @RequestHeader("Ddantime-User-Id") String uuid,
+            @Parameter(hidden = true) @RequestUser User user,
             @RequestBody UserDeviceUpdateRequestDto request) {
-        UserResponseDto response = userService.updateDeviceInfo(uuid, request);
+        UserResponseDto response = userService.updateDeviceInfo(user, request);
         return ResponseEntity.ok(response);
     }
 
@@ -62,8 +62,9 @@ public class UserController {
     @Operation(summary = "닉네임 수정", description = "사용자의 닉네임을 수정합니다.")
     public ResponseEntity<Void> updateNickname(
             @RequestHeader("Ddantime-User-Id") String uuid,
+            @Parameter(hidden = true) @RequestUser User user,
             @Valid @RequestBody UserNicknameUpdateRequestDto request) {
-        userService.updateNickname(uuid, request);
+        userService.updateNickname(user, request);
         return ResponseEntity.noContent().build();
     }
 

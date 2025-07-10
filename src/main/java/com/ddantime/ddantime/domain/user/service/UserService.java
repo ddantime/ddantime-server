@@ -5,8 +5,7 @@ import com.ddantime.ddantime.domain.user.entity.User;
 
 public interface UserService {
     UserResponseDto createUser(UserCreateRequestDto requestDto);
-    UserResponseDto getUserByUuid(String uuid);
-    UserResponseDto updateDeviceInfo(String uuid, UserDeviceUpdateRequestDto requestDto);
-    void updateNickname(String uuid, UserNicknameUpdateRequestDto requestDto);
+    UserResponseDto updateDeviceInfo(User user, UserDeviceUpdateRequestDto requestDto);
+    void updateNickname(User user, UserNicknameUpdateRequestDto requestDto);
     void withdraw(String uuid, UserWithdrawalRequestDto requestDto);
 }

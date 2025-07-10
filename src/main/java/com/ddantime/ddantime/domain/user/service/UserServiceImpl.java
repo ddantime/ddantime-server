@@ -38,17 +38,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public UserResponseDto getUserByUuid(String uuid) {
-        User user = userRepository.findById(UUID.fromString(uuid))
-                .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
-        return toDto(user);
-    }
-
-    @Override
-    public UserResponseDto updateDeviceInfo(String uuid, UserDeviceUpdateRequestDto requestDto) {
-        User user = userRepository.findById(UUID.fromString(uuid))
-                .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
-
+    public UserResponseDto updateDeviceInfo(User user, UserDeviceUpdateRequestDto requestDto) {
         user.setOsVersion(requestDto.getOsVersion());
         user.setAppVersion(requestDto.getAppVersion());
         user.setBuildNumber(requestDto.getBuildNumber());
@@ -58,19 +48,15 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public void updateNickname(String uuid, UserNicknameUpdateRequestDto requestDto) {
+    public void updateNickname(User user, UserNicknameUpdateRequestDto requestDto) {
 
         String nickname = requestDto.getNickname();
         if (userRepository.existsByNickname(nickname)) {
             throw new CustomException(ErrorCode.NICKNAME_DUPLICATED);
         }
 
-        User user = userRepository.findById(UUID.fromString(uuid))
-                .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
-
         user.setNickname(nickname);
         userRepository.save(user);
-
     }
 
     @Override
@@ -106,7 +92,4 @@ public class UserServiceImpl implements UserService {
                 .lastRecordDate(meta.getLastRecordDate())
                 .build();
     }
-
-
 }
-
