@@ -8,6 +8,7 @@ import com.ddantime.ddantime.domain.ddanjit.entity.Ddanjit;
 import com.ddantime.ddantime.domain.ddanjit.entity.LocationType;
 import com.ddantime.ddantime.domain.ddanjit.repository.DdanjitRepository;
 import com.ddantime.ddantime.domain.user.entity.User;
+import com.ddantime.ddantime.domain.user.service.UserActivityMetaService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -21,8 +22,10 @@ import java.util.stream.Collectors;
 public class DdanjitServiceImpl implements DdanjitService {
 
     private final DdanjitRepository ddanjitRepository;
+    private final UserActivityMetaService userActivityMetaService;
 
     @Override
+    @Transactional
     public DdanjitResponseDto create(User user, DdanjitRequestDto dto) {
 
         Ddanjit record = Ddanjit.builder()
@@ -39,6 +42,9 @@ public class DdanjitServiceImpl implements DdanjitService {
 
 
         Ddanjit saved = ddanjitRepository.save(record);
+
+        userActivityMetaService.updateRecordDates(saved.getUser());
+
         return toDto(saved);
     }
 

@@ -6,6 +6,7 @@ import com.ddantime.ddantime.domain.user.entity.User;
 import lombok.Builder;
 import lombok.Getter;
 
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Getter
@@ -18,5 +19,7 @@ public class UserResponseDto {
     private String osVersion;
     private String appVersion;
     private String buildNumber;
-
+    private LocalDateTime firstRecordDate;
+    private LocalDateTime lastAccessDate;
+    private LocalDateTime lastRecordDate;
 }
