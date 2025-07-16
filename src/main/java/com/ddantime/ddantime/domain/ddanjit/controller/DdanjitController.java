@@ -29,12 +29,13 @@ public class DdanjitController {
     @PostMapping
     @Operation(summary = "딴짓 기록 생성", description = "사용자의 딴짓 기록을 저장합니다.")
     @ResponseStatus(HttpStatus.CREATED)
-    public void createDdanjit(
+    public ResponseEntity<DdanjitResponseDto> createDdanjit(
             @RequestHeader("Ddantime-User-Id") String uuid,
             @Parameter(hidden = true) @RequestUser User user,
             @RequestBody @Valid DdanjitRequestDto requestDto
     ) {
-        ddanjitService.create(user, requestDto);
+        DdanjitResponseDto response = ddanjitService.create(user, requestDto);
+        return ResponseEntity.ok(response);
     }
 
     @GetMapping
