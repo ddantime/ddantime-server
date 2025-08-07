@@ -8,7 +8,6 @@ import com.ddantime.ddantime.domain.ddanjit.entity.Ddanjit;
 import com.ddantime.ddantime.domain.ddanjit.entity.LocationType;
 import com.ddantime.ddantime.domain.ddanjit.repository.DdanjitRepository;
 import com.ddantime.ddantime.domain.user.entity.User;
-import com.ddantime.ddantime.domain.user.entity.UserActivityMeta;
 import com.ddantime.ddantime.domain.user.service.UserActivityMetaService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;

@@ -29,6 +29,8 @@ spring:
       hibernate:
         format_sql: true
         dialect: org.hibernate.dialect.PostgreSQLDialect
+        jdbc:
+          time_zone: Asia/Seoul
   springdoc:
     # 기본적으로 사용할 요청 및 응답의 미디어 타입을 설정
     default-produces-media-type: application/json;charset=UTF-8
