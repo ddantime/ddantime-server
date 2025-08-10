@@ -3,6 +3,7 @@ package com.ddantime.ddantime.domain.user.service;
 import com.ddantime.ddantime.common.exception.CustomException;
 import com.ddantime.ddantime.common.exception.ErrorCode;
 import com.ddantime.ddantime.domain.user.dto.*;
+import com.ddantime.ddantime.domain.user.entity.DeviceInfo;
 import com.ddantime.ddantime.domain.user.entity.User;
 import com.ddantime.ddantime.domain.user.entity.UserActivityMeta;
 import com.ddantime.ddantime.domain.user.entity.UserWithdrawalReason;
@@ -12,6 +13,7 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Service
@@ -22,29 +24,20 @@ public class UserServiceImpl implements UserService {
     private final UserWithdrawalReasonRepository reasonRepository;
 
     @Override
+    @Transactional
     public UserResponseDto createUser(UserCreateRequestDto requestDto) {
+
         User user = User.builder()
-                .os(requestDto.getOs())
-                .osVersion(requestDto.getOsVersion())
-                .appVersion(requestDto.getAppVersion())
-                .buildNumber(requestDto.getBuildNumber())
+                .nickname(null)
+                .onboardingCompleted(false)
                 .build();
 
-        UserActivityMeta activityMeta = UserActivityMeta.of(user);
-        user.setActivityMeta(activityMeta);
+        user.setActivityMeta(UserActivityMeta.of(user));
+        user.setDeviceInfo(DeviceInfo.of(user, requestDto));
 
         userRepository.save(user);
-        return toDto(user);
-    }
 
-    @Override
-    public UserResponseDto updateDeviceInfo(User user, UserDeviceUpdateRequestDto requestDto) {
-        user.setOsVersion(requestDto.getOsVersion());
-        user.setAppVersion(requestDto.getAppVersion());
-        user.setBuildNumber(requestDto.getBuildNumber());
-
-        userRepository.save(user);
-        return toDto(user);
+        return UserResponseDto.of(user);
     }
 
     @Override
@@ -74,22 +67,5 @@ public class UserServiceImpl implements UserService {
 
         // 사용자 삭제
         userRepository.delete(user);
-    }
-
-    private UserResponseDto toDto(User user) {
-        UserActivityMeta meta = user.getActivityMeta();
-
-        return UserResponseDto.builder()
-                .uuid(user.getId().toString())
-                .nickname(user.getNickname())
-                .onboardingCompleted(user.isOnboardingCompleted())
-                .os(user.getOs())
-                .osVersion(user.getOsVersion())
-                .appVersion(user.getAppVersion())
-                .buildNumber(user.getBuildNumber())
-                .lastAccessDate(meta.getLastAccessDate())
-                .firstRecordDate(meta.getFirstRecordDate())
-                .lastRecordDate(meta.getLastRecordDate())
-                .build();
     }
 }

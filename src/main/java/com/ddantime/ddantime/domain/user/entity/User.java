@@ -27,19 +27,6 @@ public class User {
     @GeneratedValue
     private UUID id;
 
-    @Enumerated(EnumType.STRING)
-    @Column(name = "os", nullable = false)
-    private OsType os;
-
-    @Column(name = "os_version", length = 20)
-    private String osVersion;
-
-    @Column(name = "app_version", length = 20)
-    private String appVersion;
-
-    @Column(name = "build_number", length = 20)
-    private String buildNumber;
-
     @Column(length = 30)
     private String nickname;
 
@@ -75,5 +62,7 @@ public class User {
     @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private UserActivityMeta activityMeta;
 
+    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private DeviceInfo deviceInfo;
 }
 
