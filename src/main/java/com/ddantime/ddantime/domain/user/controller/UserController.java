@@ -4,6 +4,7 @@ package com.ddantime.ddantime.domain.user.controller;
 import com.ddantime.ddantime.common.annotation.RequestUser;
 import com.ddantime.ddantime.domain.user.dto.*;
 import com.ddantime.ddantime.domain.user.entity.User;
+import com.ddantime.ddantime.domain.user.service.DeviceInfoService;
 import com.ddantime.ddantime.domain.user.service.UserActivityMetaService;
 import com.ddantime.ddantime.domain.user.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -22,10 +23,12 @@ public class UserController {
 
     private final UserService userService;
     private final UserActivityMetaService userActivityMetaService;
+    private final DeviceInfoService deviceInfoService;
 
     @PostMapping
     @Operation(summary = "사용자 등록", description = "앱 최초 실행 시 디바이스 정보로 사용자 생성")
-    public ResponseEntity<UserResponseDto> createUser(@RequestBody UserCreateRequestDto request) {
+    public ResponseEntity<UserResponseDto> createUser(
+            @Valid @RequestBody UserCreateRequestDto request) {
         UserResponseDto response = userService.createUser(request);
         return ResponseEntity.ok(response);
     }
@@ -49,12 +52,24 @@ public class UserController {
     }
 
     @PatchMapping("/me/device-info")
-    @Operation(summary = "기기 정보 업데이트", description = "OS/App/Build 버전이 변경된 경우 업데이트")
+    @Operation(summary = "기기 정보 업데이트", description = "OS, OS 버전, 앱 버전, 빌드 번호를 업데이트합니다.")
     public ResponseEntity<UserResponseDto> updateDeviceInfo(
             @RequestHeader("Ddantime-User-Id") String uuid,
             @Parameter(hidden = true) @RequestUser User user,
-            @RequestBody UserDeviceUpdateRequestDto request) {
-        UserResponseDto response = userService.updateDeviceInfo(user, request);
+            @Valid @RequestBody DeviceInfoUpdateRequestDto request
+    ) {
+        UserResponseDto response = deviceInfoService.updateDeviceInfo(user, request);
+        return ResponseEntity.ok(response);
+    }
+
+    @PatchMapping("/me/device-token")
+    @Operation(summary = "FCM 토큰 업데이트", description = "푸시 알림을 위한 FCM 토큰을 업데이트합니다.")
+    public ResponseEntity<UserResponseDto> updateFcmToken(
+            @RequestHeader("Ddantime-User-Id") String uuid,
+            @Parameter(hidden = true) @RequestUser User user,
+            @Valid @RequestBody FcmTokenUpdateRequestDto request
+    ) {
+        UserResponseDto response = deviceInfoService.updateFcmToken(user, request);
         return ResponseEntity.ok(response);
     }
 

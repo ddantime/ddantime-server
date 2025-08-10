@@ -1,6 +1,7 @@
 package com.ddantime.ddantime.domain.user.dto;
 
 
+import com.ddantime.ddantime.domain.user.entity.DeviceInfo;
 import com.ddantime.ddantime.domain.user.entity.OsType;
 import com.ddantime.ddantime.domain.user.entity.User;
 import com.ddantime.ddantime.domain.user.entity.UserActivityMeta;
@@ -37,6 +38,9 @@ public class UserResponseDto {
     @Schema(description = "앱 빌드 번호", example = "100")
     private String buildNumber;
 
+    @Schema(description = "FCM 토큰", example = "d32Fcm45Token8x...")
+    private String fcmToken;
+
     @Schema(description = "최초 딴짓 기록일", example = "2024-06-01T14:22:00")
     private LocalDateTime firstRecordDate;
 
@@ -48,19 +52,20 @@ public class UserResponseDto {
 
     public static UserResponseDto of(User user) {
         UserActivityMeta meta = user.getActivityMeta();
+        DeviceInfo deviceInfo = user.getDeviceInfo();
 
         return UserResponseDto.builder()
                 .uuid(user.getId().toString())
                 .nickname(user.getNickname())
                 .onboardingCompleted(user.isOnboardingCompleted())
-                .os(user.getOs())
-                .osVersion(user.getOsVersion())
-                .appVersion(user.getAppVersion())
-                .buildNumber(user.getBuildNumber())
+                .os(deviceInfo.getOs())
+                .osVersion(deviceInfo.getOsVersion())
+                .appVersion(deviceInfo.getAppVersion())
+                .buildNumber(deviceInfo.getBuildNumber())
+                .fcmToken(deviceInfo.getFcmToken())
                 .lastAccessDate(meta.getLastAccessDate())
                 .firstRecordDate(meta.getFirstRecordDate())
                 .lastRecordDate(meta.getLastRecordDate())
                 .build();
     }
-
 }
