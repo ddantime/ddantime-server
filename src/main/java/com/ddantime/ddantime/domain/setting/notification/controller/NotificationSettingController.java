@@ -33,7 +33,6 @@ public class NotificationSettingController {
         return ResponseEntity.ok(responseDto);
     }
 
-    // TODO create 생성 프론트 논의 필요
     @PutMapping
     @Operation(summary = "알림 설정 저장", description = "전체 알림 여부, 돌아와요/약속해요 딴타임 알림 여부 및 시간 목록을 설정합니다.")
     public ResponseEntity<NotificationSettingResponseDto> saveSettings(
