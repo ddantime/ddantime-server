@@ -31,17 +31,4 @@ public class NotificationSettingRequestDto {
     @Size(max = 5, message = "알림 시간은 최대 5개까지 설정할 수 있습니다.")
     private List<@Pattern(regexp = "^([01]\\d|2[0-3]):[0-5]\\d$", message = "시간 형식은 HH:mm이어야 합니다.") String> promiseTimes;
 
-    public void applySettingsHelper() {
-
-        // 시간에 중복값이 있으면 제거
-        if (this.promiseTimes != null) {
-            this.promiseTimes = this.promiseTimes.stream().distinct().collect(Collectors.toList());
-        }
-
-        // 전체 알림 on이면, 모든 알림 on
-        if (allNotificationsEnabled) {
-            this.comebackNotificationEnabled = true;
-            this.promiseNotificationEnabled = true;
-        }
-    }
 }

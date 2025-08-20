@@ -3,9 +3,8 @@ package com.ddantime.ddantime.domain.setting.notification.entity;
 import com.ddantime.ddantime.domain.user.entity.User;
 import jakarta.persistence.*;
 import lombok.*;
-import org.hibernate.annotations.JdbcTypeCode;
-import org.hibernate.type.SqlTypes;
 
+import java.util.ArrayList;
 import java.util.List;
 
 
@@ -30,7 +29,7 @@ public class NotificationSetting {
     private boolean comebackNotificationEnabled; // 돌아와요 딴타임 알림
     private boolean promiseNotificationEnabled;  // 약속해요 딴타임 알림
 
-    @Column(columnDefinition = "jsonb")
-    @JdbcTypeCode(SqlTypes.JSON)
-    private List<String> promiseTimes;
+    @OneToMany(mappedBy = "setting", cascade = CascadeType.ALL, orphanRemoval = true)
+    @Builder.Default
+    private List<NotificationPromiseTime> promiseTimes = new ArrayList<>();
 }
