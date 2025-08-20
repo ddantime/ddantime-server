@@ -23,7 +23,7 @@ spring:
     driver-class-name: org.postgresql.Driver
   jpa:
     hibernate:
-      ddl-auto: update  # dev/local은 create 또는 update / prod는 validate 추천
+      ddl-auto: validate # update  # dev/local은 create 또는 update / prod는 validate 추천
     show-sql: true
     properties:
       hibernate:
@@ -35,7 +35,6 @@ spring:
     # 기본적으로 사용할 요청 및 응답의 미디어 타입을 설정
     default-produces-media-type: application/json;charset=UTF-8
     default-consumes-media-type: application/json;charset=UTF-8
-
 ---
 
 spring:
@@ -59,7 +58,13 @@ server:
 springdoc:
   # 요청 URL 강제 HTTPS (OpenAPI URL이 현재 도메인을 따라가지 않도록 고정)
   server-url: https://ddantime-dev-647554719138.asia-northeast3.run.app
-
+logging:
+  level:
+    root: INFO
+    com.ddantime: DEBUG
+    org.hibernate.SQL: DEBUG
+    org.hibernate.orm.jdbc.bind: TRACE
+    org.springframework.transaction: INFO
 ---
 
 spring:

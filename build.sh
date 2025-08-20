@@ -1,14 +1,16 @@
 #chmod +x build.sh
 # !/bin/bash
-
 PROJECT_ID="ddantime"
-IMAGE="asia-northeast3-docker.pkg.dev/$PROJECT_ID/ddantime-dev/ddantime-dev:latest"
+REGION="asia-northeast3"
+REPO="ddantime-dev"
+IMAGE_NAME="ddantime-dev"
+IMAGE="asia-northeast3-docker.pkg.dev/${PROJECT_ID}/${REPO}/${IMAGE_NAME}:latest"
 
-echo "📦 Docker build (for linux/amd64) 시작..."
+echo "📦 Docker buildx (linux/amd64) 시작..."
 docker buildx build \
-  --platform=linux/amd64 \
+  --platform linux/amd64 \
   -f Dockerfile.dev \
-  -t $IMAGE \
+  -t "${IMAGE}" \
   --push .
 
-echo "✅ Docker image 빌드 및 GCP Artifact Registry 푸시 완료!"
+echo "✅ 이미지 푸시 완료 → ${IMAGE}"
