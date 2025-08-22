@@ -4,28 +4,26 @@
 PROJECT_ID="ddantime"
 REGION="asia-northeast3"
 SERVICE_NAME="ddantime-dev"
-IMAGE="asia-northeast3-docker.pkg.dev/$PROJECT_ID/ddantime-dev/ddantime-dev:latest"
-ENV_FILE=".env.dev"
-TEMP_YAML="env.gcp.yaml"
-INSTANCE_CONNECTION_NAME="ddantime:asia-northeast3:ddantime-sql"
+REPO="ddantime-dev"
+IMAGE_NAME="ddantime-dev"
+IMAGE="asia-northeast3-docker.pkg.dev/${PROJECT_ID}/${REPO}/${IMAGE_NAME}:latest"
 
-echo "📦 .env.dev → env.gcp.yaml 변환 중..."
-awk -F= '{
-  key=$1;
-  sub(/^[^=]*=/, "", $0);  # 첫 번째 = 이전 제거하고 나머지 전체를 value로 취급
-  print key ": " $0;
-}' "$ENV_FILE" > "$TEMP_YAML"
+INSTANCE_CONNECTION_NAME="${PROJECT_ID}:${REGION}:ddantime"
 
-echo "🚀 Cloud Run 배포 시작..."
-gcloud run deploy $SERVICE_NAME \
-  --image=$IMAGE \
-  --platform=managed \
-  --region=$REGION \
+RUN_SA="ddantime-run-dev@${PROJECT_ID}.iam.gserviceaccount.com"
+FIREBASE_PROJECT_ID="ddantime-ygjh"
+
+gcloud run deploy "${SERVICE_NAME}" \
+  --project "${PROJECT_ID}" \
+  --region "${REGION}" \
+  --image "${IMAGE}" \
+  --platform managed \
   --allow-unauthenticated \
-  --env-vars-file=$TEMP_YAML \
-  --add-cloudsql-instances=$INSTANCE_CONNECTION_NAME
-
-echo "🧹 임시 파일 정리 중..."
-rm -f $TEMP_YAML
+  --service-account "${RUN_SA}" \
+  --add-cloudsql-instances "${INSTANCE_CONNECTION_NAME}" \
+  --set-secrets DB_USERNAME=db-username:latest \
+  --set-secrets DB_PASSWORD=db-password:latest \
+  --set-env-vars SPRING_PROFILES_ACTIVE=dev,SWAGGER_SERVER_URL="https://ddantime-dev-647554719138.asia-northeast3.run.app/",DB_URL="jdbc:postgresql:///ddantime-dev?cloudSqlInstance=${INSTANCE_CONNECTION_NAME}&socketFactory=com.google.cloud.sql.postgres.SocketFactory",FIREBASE_PROJECT_ID="${FIREBASE_PROJECT_ID}",JAVA_TOOL_OPTIONS="-Duser.timezone=Asia/Seoul" \
+  --timeout 300
 
 echo "✅ 배포 완료!"
