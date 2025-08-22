@@ -10,14 +10,24 @@ public interface UserActivityMetaRepository extends JpaRepository<UserActivityMe
     UserActivityMeta findByUser(User user);
 
     // XXX 리팩토링 필요. UserActivityMetaRepository 에서 join이 필요한지 고민.
-    @Query(value = """
-        SELECT m.*
-        FROM user_activity_meta m
-        JOIN notification_settings ns ON ns.user_id = m.user_id
-        WHERE ns.all_notifications_enabled
-          AND ns.comeback_notification_enabled
-          AND m.last_record_date IS NOT NULL;
-        """, nativeQuery = true)
+//    @Query(value = """
+//        SELECT m.*
+//        FROM user_activity_meta m
+//        JOIN notification_settings ns ON ns.user_id = m.user_id
+//        WHERE ns.all_notifications_enabled
+//          AND ns.comeback_notification_enabled
+//          AND m.last_record_date IS NOT NULL;
+//        """, nativeQuery = true)
+
+    @Query("""
+    SELECT m
+    FROM UserActivityMeta m
+    JOIN m.user u
+    JOIN NotificationSetting ns ON ns.user = u
+    WHERE ns.allNotificationsEnabled = true
+      AND ns.comebackNotificationEnabled = true
+      AND m.lastRecordDate IS NOT NULL
+    """)
     List<UserActivityMeta> findComeBackTargets();
 }
 //AND m.last_record_date <= now() - INTERVAL '0 days';

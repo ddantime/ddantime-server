@@ -23,7 +23,7 @@ gcloud run deploy "${SERVICE_NAME}" \
   --add-cloudsql-instances "${INSTANCE_CONNECTION_NAME}" \
   --set-secrets DB_USERNAME=db-username:latest \
   --set-secrets DB_PASSWORD=db-password:latest \
-  --set-env-vars SPRING_PROFILES_ACTIVE=dev,SWAGGER_SERVER_URL="https://ddantime-dev-647554719138.asia-northeast3.run.app/",DB_URL="jdbc:postgresql:///ddantime-dev?cloudSqlInstance=${INSTANCE_CONNECTION_NAME}&socketFactory=com.google.cloud.sql.postgres.SocketFactory",FIREBASE_PROJECT_ID="${FIREBASE_PROJECT_ID}" \
+  --set-env-vars SPRING_PROFILES_ACTIVE=dev,SWAGGER_SERVER_URL="https://ddantime-dev-647554719138.asia-northeast3.run.app/",DB_URL="jdbc:postgresql:///ddantime-dev?cloudSqlInstance=${INSTANCE_CONNECTION_NAME}&socketFactory=com.google.cloud.sql.postgres.SocketFactory",FIREBASE_PROJECT_ID="${FIREBASE_PROJECT_ID}",JAVA_TOOL_OPTIONS="-Duser.timezone=Asia/Seoul" \
   --timeout 300
 
 echo "✅ 배포 완료!"

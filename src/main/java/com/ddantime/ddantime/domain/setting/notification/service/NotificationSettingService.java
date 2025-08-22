@@ -7,6 +7,8 @@ import com.ddantime.ddantime.domain.setting.notification.entity.NotificationSett
 import com.ddantime.ddantime.domain.setting.notification.repository.NotificationPromiseTimeRepository;
 import com.ddantime.ddantime.domain.setting.notification.repository.NotificationSettingRepository;
 import com.ddantime.ddantime.domain.user.entity.User;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
 import org.springframework.transaction.annotation.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -19,7 +21,9 @@ import java.util.List;
 public class NotificationSettingService {
 
     private final NotificationSettingRepository notificationSettingRepository;
-    private final NotificationPromiseTimeRepository notificationPromiseTimeRepository;
+
+    @PersistenceContext
+    private final EntityManager entityManager;
 
     @Transactional(readOnly = true)
     public NotificationSettingResponseDto getSetting(User user) {
@@ -47,6 +51,7 @@ public class NotificationSettingService {
         boolean all = dto.isAllNotificationsEnabled();
         boolean comeback = dto.isComebackNotificationEnabled();
         boolean promise = dto.isPromiseNotificationEnabled();
+
         if (all) {
             comeback = true;
             promise = true;
@@ -58,6 +63,8 @@ public class NotificationSettingService {
 
         // 기존 시간 삭제
         setting.getPromiseTimes().clear();
+
+        entityManager.flush();
 
         if (dto.getPromiseTimes() != null) {
             dto.getPromiseTimes().stream()

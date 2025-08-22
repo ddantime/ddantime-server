@@ -2,8 +2,10 @@ package com.ddantime.ddantime.domain.notification.service;
 
 import com.ddantime.ddantime.common.firebase.FcmService;
 import com.ddantime.ddantime.domain.notification.dto.NotificationMessage;
+import com.ddantime.ddantime.domain.setting.notification.repository.NotificationPromiseTimeRepository;
 import com.ddantime.ddantime.domain.setting.notification.repository.NotificationSettingRepository;
 import com.ddantime.ddantime.domain.user.entity.UserActivityMeta;
+import com.ddantime.ddantime.domain.user.repository.DeviceInfoRepository;
 import com.ddantime.ddantime.domain.user.repository.UserActivityMetaRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -11,10 +13,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Random;
+import java.time.LocalTime;
+import java.util.*;
 
 @Slf4j
 @Service
@@ -23,6 +23,8 @@ public class NotificationService {
 
     private final UserActivityMetaRepository userActivityMetaRepository;
     private final NotificationSettingRepository notificationSettingRepository;
+    private final NotificationPromiseTimeRepository notificationPromiseTimeRepository;
+    private final DeviceInfoRepository deviceInfoRepository;
     private final FcmService fcmService;
 
     private final Random random = new Random();
@@ -69,8 +71,8 @@ public class NotificationService {
 
 
             // 실행당 그룹별로 1개만 뽑기
-            NotificationMessage accessedMsg = getRandomMessage(COMEBACK_NO_ACCESS_MESSAGES);
-            NotificationMessage notAccessedMsg = getRandomMessage(COMEBACK_ACCESS_MESSAGES);
+            NotificationMessage accessedMsg = getRandomMessage(COMEBACK_ACCESS_MESSAGES);
+            NotificationMessage notAccessedMsg = getRandomMessage(COMEBACK_NO_ACCESS_MESSAGES);
 
             int success = 0, fail = 0;
 
@@ -92,11 +94,11 @@ public class NotificationService {
                     String foregroundMessage = notAccessedMsg.foregroundMessage();
 
                     LocalDateTime lastAccess = meta.getLastAccessDate();
-                    if (lastAccess != null && lastAccess.isAfter(LocalDateTime.now().minusDays(3))) {
+                    if (lastAccess != null && !lastAccess.isBefore(LocalDateTime.now().minusDays(3))) {
                         // 최근 3일 안에 접속한 사용자
                         title = accessedMsg.title();
                         body = accessedMsg.body();
-                        foregroundMessage = notAccessedMsg.foregroundMessage();
+                        foregroundMessage = accessedMsg.foregroundMessage();
                     }
 
                     payload.put("foregroundMessage", foregroundMessage);
@@ -113,29 +115,63 @@ public class NotificationService {
     }
 
     public void sendPromiseNotifications() {
+        // 요청 시각을 slot 단위로 변환 (10분 단위)
+        int minuteOfDay = LocalTime.now().getHour() * 60 + LocalTime.now().getMinute();
+        int slot = (minuteOfDay / 10) * 10;
 
-        // 대상 조회
-        // TODO NotificationSetting에서 알림 설정이 켜져있는지 확인 필요.
-        // TODO 현재 시간에 해당되는 사용자를 조회해야함. NotificationSetting에 json으로 시간이 저장되어있는데, 검색이 불편한가? 구조를 바꿔야할가.
+        log.info("⏰ scheduledTime={}",  toHHMM(slot));
 
-        List<UserActivityMeta> targets = userActivityMetaRepository.findComeBackTargets();
-        if (targets.isEmpty()) return;
+        // 알림 켠 유저 중 slot에 해당하는 대상자 조회
+        List<UUID> userIds = notificationPromiseTimeRepository.findUserIdsForMinute((short) slot);
 
-        NotificationMessage promiseMsg = getRandomMessage(PROMISE_MESSAGES);
-
-        int success = 0, fail = 0;
-        for (UserActivityMeta meta : targets) {
-            String token = meta.getUser().getDeviceInfo().getFcmToken();
-            if (token == null || token.isBlank()) continue;
-
-            try {
-                fcmService.sendMessage(token, promiseMsg.title(), promiseMsg.body(), Map.of("type", "promise"));
-                success++;
-            } catch (Exception e) {
-                fail++;
-                log.error("FCM 발송 실패 userId={} token={}", meta.getUser().getId(), token, e);
-            }
+        // 현재 20:00 이면, 설정 시간이 없는 사용자도 조회
+        List<UUID> userIdsWithoutTime = Collections.emptyList();
+        if (slot == 1200) {
+            userIdsWithoutTime = notificationSettingRepository.findUserIdsWithoutPromiseTimes();
         }
-        log.info("✅ 약속해요 발송 완료: 성공 {} / 실패 {}", success, fail);
+
+        Set<UUID> targetUserIds = new HashSet<>();
+        targetUserIds.addAll(userIds);
+        targetUserIds.addAll(userIdsWithoutTime);
+
+        if (!targetUserIds.isEmpty()) {
+            // 3. 해당 유저들의 FCM 토큰 조회
+            Set<String> tokens = new HashSet<>(deviceInfoRepository.findFcmTokensByUserIds(userIds));
+
+            int success = 0, fail = 0;
+
+            NotificationMessage notificationMessage = getRandomMessage(PROMISE_MESSAGES);
+
+            String title = notificationMessage.title();
+            String body = notificationMessage.body();
+            String foregroundMessage = notificationMessage.foregroundMessage();
+
+
+            Map<String, String> payload = new HashMap<>(Map.of(
+                    "environment", activeProfile,
+                    "type", "comeback",
+                    "foregroundMessage", foregroundMessage,
+                    "scheduledTime", toHHMM(slot)
+            ));
+
+            // 4. 토큰별 발송
+            for (String token : tokens) {
+                try {
+                    fcmService.sendMessage(token, title, body, payload);
+                    success++;
+                } catch (Exception e) {
+                    fail++;
+                    log.error("FCM 발송 실패 token={}", token, e);
+                }
+            }
+
+            log.info("✅ 약속해요 알림 발송 완료: 성공 {}건, 실패 {}건", success, fail);
+        }
+    }
+
+    private String toHHMM(int minutes) {
+        int h = minutes / 60;
+        int m = minutes % 60;
+        return String.format("%02d:%02d", h, m);
     }
 }
