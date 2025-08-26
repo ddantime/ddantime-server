@@ -1,5 +1,6 @@
 package com.ddantime.ddantime.domain.ddanjit.entity;
 
+import com.ddantime.ddantime.common.crypto.EncryptStringConverter;
 import com.ddantime.ddantime.domain.ddanjit.dto.DdanjitRequestDto;
 import com.ddantime.ddantime.domain.user.entity.User;
 import jakarta.persistence.*;
@@ -30,7 +31,8 @@ public class Ddanjit {
     @Column(name = "date", nullable = false)
     private LocalDate date;
 
-    @Column(nullable = false, length = 100)
+    @Column(nullable = false)
+    @Convert(converter = EncryptStringConverter.class)
     private String activity;
 
     @Column(name = "start_time", nullable = false)
@@ -48,7 +50,8 @@ public class Ddanjit {
     private LocationType location;
 
     // 기타 장소 (locationType = OTHER인 경우)
-    @Column(name = "location_etc", length = 20)
+    @Column(name = "location_etc")
+    @Convert(converter = EncryptStringConverter.class)
     private String locationEtc;
 
     @Enumerated(EnumType.STRING)
@@ -56,6 +59,7 @@ public class Ddanjit {
     private MoodType mood;
 
     @Column(columnDefinition = "TEXT")
+    @Convert(converter = EncryptStringConverter.class)
     private String memo;
 
     @CreationTimestamp

@@ -1,5 +1,6 @@
 package com.ddantime.ddantime.domain.user.entity;
 
+import com.ddantime.ddantime.common.crypto.EncryptStringConverter;
 import com.ddantime.ddantime.domain.ddanjit.entity.Ddanjit;
 import com.ddantime.ddantime.domain.onboarding.entity.Onboarding;
 import com.ddantime.ddantime.domain.quote.entity.QuoteLog;
@@ -27,7 +28,8 @@ public class User {
     @GeneratedValue
     private UUID id;
 
-    @Column(length = 30)
+    @Column()
+    @Convert(converter = EncryptStringConverter.class)
     private String nickname;
 
     @Column(name = "onboarding_completed", nullable = false)
