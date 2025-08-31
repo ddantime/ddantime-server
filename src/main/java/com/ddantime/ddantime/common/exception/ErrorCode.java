@@ -7,6 +7,9 @@ import org.springframework.http.HttpStatus;
 @Getter
 @RequiredArgsConstructor
 public enum ErrorCode {
+
+    INTERNAL_SERVER_ERROR("E000", "INTERNAL_SERVER_ERROR.", HttpStatus.INTERNAL_SERVER_ERROR),
+
     MISSING_HEADER("E001", "필수 헤더가 없습니다.", HttpStatus.UNAUTHORIZED),
     VALIDATION_ERROR("E002","유효성 검사 실패", HttpStatus.BAD_REQUEST),
     INVALID_ENUM("E003","잘못된 enum 값이 입력되었습니다.", HttpStatus.BAD_REQUEST),

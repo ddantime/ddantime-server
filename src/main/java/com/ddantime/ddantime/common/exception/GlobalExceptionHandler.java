@@ -1,5 +1,6 @@
 package com.ddantime.ddantime.common.exception;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.support.DefaultMessageSourceResolvable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -14,11 +15,18 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 
 @RestControllerAdvice // 전역 예외 처리기 (모든 컨트롤러에서 발생하는 예외 처리)
+@Slf4j
 public class GlobalExceptionHandler {
 
     @ExceptionHandler(CustomException.class)
     public ResponseEntity<ErrorResponseDto> handleCustomException(CustomException e) {
         return ErrorResponseDto.toResponseEntity(e.getErrorCode());
+    }
+
+    @ExceptionHandler(Exception.class)
+    public ResponseEntity<ErrorResponseDto> handleAnyException(Exception e) {
+        log.error("Unhandled exception", e);
+        return ErrorResponseDto.toResponseEntity(ErrorCode.INTERNAL_SERVER_ERROR);
     }
 
     // @Valid 에러

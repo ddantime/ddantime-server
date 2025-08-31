@@ -36,9 +36,6 @@ public class User {
     @Builder.Default
     private boolean onboardingCompleted = false;
 
-    @Column(name = "last_login_at")
-    private LocalDateTime lastLoginAt;
-
     @CreationTimestamp
     @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt;
