@@ -12,6 +12,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.*;
@@ -57,9 +58,10 @@ public class NotificationService {
     }
 
     public void sendComeBackNotifications() {
+        LocalDateTime threshold = LocalDateTime.now().minusDays(5);
 
         // 대상 조회
-        List<UserActivityMeta> targets = userActivityMetaRepository.findComeBackTargets();
+        List<UserActivityMeta> targets = userActivityMetaRepository.findComeBackTargets(threshold);
 
         log.info("돌아와요 발송 대상 수: {}", targets.size());
 
@@ -115,57 +117,23 @@ public class NotificationService {
     }
 
     public void sendPromiseNotifications() {
-        // 요청 시각을 slot 단위로 변환 (10분 단위)
+        // XXX. 스케줄러 비용이슈로 우선 30분 단위로 수정
+        // 요청 시각을 slot 단위로 변환 (30분 단위)
         int minuteOfDay = LocalTime.now().getHour() * 60 + LocalTime.now().getMinute();
-        int slot = (minuteOfDay / 10) * 10;
+        int slot = (minuteOfDay / 30) * 30;  // 30분 단위로 내림
 
         log.info("⏰ scheduledTime={}",  toHHMM(slot));
 
         // 알림 켠 유저 중 slot에 해당하는 대상자 조회
         List<UUID> userIds = notificationPromiseTimeRepository.findUserIdsForMinute((short) slot);
 
+        // slot 기반 유저
+        sendPromiseGroup(userIds, slot, false);
+
         // 현재 20:00 이면, 설정 시간이 없는 사용자도 조회
-        List<UUID> userIdsWithoutTime = Collections.emptyList();
         if (slot == 1200) {
-            userIdsWithoutTime = notificationSettingRepository.findUserIdsWithoutPromiseTimes();
-        }
-
-        Set<UUID> targetUserIds = new HashSet<>();
-        targetUserIds.addAll(userIds);
-        targetUserIds.addAll(userIdsWithoutTime);
-
-        if (!targetUserIds.isEmpty()) {
-            // 3. 해당 유저들의 FCM 토큰 조회
-            Set<String> tokens = new HashSet<>(deviceInfoRepository.findFcmTokensByUserIds(userIds));
-
-            int success = 0, fail = 0;
-
-            NotificationMessage notificationMessage = getRandomMessage(PROMISE_MESSAGES);
-
-            String title = notificationMessage.title();
-            String body = notificationMessage.body();
-            String foregroundMessage = notificationMessage.foregroundMessage();
-
-
-            Map<String, String> payload = new HashMap<>(Map.of(
-                    "environment", activeProfile,
-                    "type", "comeback",
-                    "foregroundMessage", foregroundMessage,
-                    "scheduledTime", toHHMM(slot)
-            ));
-
-            // 4. 토큰별 발송
-            for (String token : tokens) {
-                try {
-                    fcmService.sendMessage(token, title, body, payload);
-                    success++;
-                } catch (Exception e) {
-                    fail++;
-                    log.error("FCM 발송 실패 token={}", token, e);
-                }
-            }
-
-            log.info("✅ 약속해요 알림 발송 완료: 성공 {}건, 실패 {}건", success, fail);
+            List<UUID> userIdsWithoutTime  = notificationSettingRepository.findUserIdsWithoutPromiseTimes();
+            sendPromiseGroup(userIdsWithoutTime, slot, true);
         }
     }
 
@@ -174,4 +142,43 @@ public class NotificationService {
         int m = minutes % 60;
         return String.format("%02d:%02d", h, m);
     }
+
+    private void sendPromiseGroup(List<UUID> userIds, int slot, boolean withoutTime) {
+        if (userIds.isEmpty()) return;
+
+        List<String> tokens = deviceInfoRepository.findFcmTokensByUserIds(userIds);
+
+        log.info("약속해요 발송 대상 tokens 수: {} ({} 사용자)",
+                tokens.size(),
+                withoutTime ? "default" : "custom");
+
+        int success = 0, fail = 0;
+        NotificationMessage notificationMessage = getRandomMessage(PROMISE_MESSAGES);
+
+        String title = notificationMessage.title();
+        String body = notificationMessage.body();
+        String foregroundMessage = notificationMessage.foregroundMessage();
+
+        Map<String, String> payload = new HashMap<>(Map.of(
+                "environment", activeProfile,
+                "type", "promise",
+                "foregroundMessage", foregroundMessage,
+                "scheduledTime", toHHMM(slot),
+                "timeType", withoutTime ? "default" : "custom"
+        ));
+
+        for (String token : tokens) {
+            try {
+                fcmService.sendMessage(token, title, body, payload);
+                success++;
+            } catch (Exception e) {
+                fail++;
+                log.error("FCM 발송 실패 token={}", token, e);
+            }
+        }
+
+        log.info("✅ 약속해요 알림 발송 완료: 성공 {}건, 실패 {}건 ({} 사용자)",
+                success, fail, withoutTime ? "default" : "custom");
+    }
+
 }
